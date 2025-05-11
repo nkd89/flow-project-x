@@ -23,16 +23,28 @@ import {
   SearchIcon,
   Logo,
 } from "@/components/icons";
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, User} from "@heroui/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar} from "@heroui/react";
 import { signOut, useSession } from "next-auth/react";
+import { Session } from "next-auth";
+import { useEffect, useState } from "react";
+import { User } from "@/types/user";
 
 export const Navbar = () => {
 
-
-  const session = useSession();
-
-  console.log(session?.data);
-
+  const { data: sessionData } = useSession();
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    if (sessionData) {
+      setSession(sessionData);
+      if (sessionData.user) {
+        setUser(sessionData?.user as User);
+      }
+    } else {
+      setSession(null);
+      setUser(null);
+    }
+  }, [sessionData]);
 
   const searchInput = (
     <Input
@@ -91,7 +103,7 @@ export const Navbar = () => {
         </NavbarItem>
         {/* <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem> */}
         <NavbarItem >
-          {session?.status === "authenticated" ? (
+          {user !== null ? (
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
               <Avatar
@@ -99,19 +111,19 @@ export const Navbar = () => {
                 isBordered
                 as="button"
                 className="transition-transform"
-                name={`${session?.data?.user?.first_name} ${session?.data?.user?.last_name}`}
-                src={session?.data?.user?.avatar}
+                name={`${user?.first_name} ${user?.last_name}`}
+                src={user?.avatar}
               />
             </DropdownTrigger>
             <DropdownMenu aria-label="Profile Actions" variant="flat">
               <DropdownItem key="profile-item" className="h-14 gap-2">
                 <p className="font-semibold">Профиль</p>
-                <p className="font-semibold">{session?.data?.user?.email ?? session?.data?.user?.phone}</p>
+                <p className="font-semibold">{user?.email ?? user?.phone}</p>
               </DropdownItem>
               <DropdownItem key="system-item">Мб кнопка</DropdownItem>
               <DropdownItem key="configurations-item">Не кнопка</DropdownItem>
               <DropdownItem onClick={() => signOut()} key="logout-item" color="danger">
-                Log Out
+                Выйти
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
@@ -133,7 +145,7 @@ export const Navbar = () => {
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
         <ThemeSwitch />
         <NavbarItem>
-          {session?.status === "authenticated" ? (
+          {user ? (
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
               <Avatar
@@ -141,19 +153,21 @@ export const Navbar = () => {
                 isBordered
                 as="button"
                 className="transition-transform"
-                name={`${session?.data?.user?.first_name} ${session?.data?.user?.last_name}`}
-                src={session?.data?.user?.avatar}
+                name={`${user?.first_name} ${user?.last_name}`}
+                src={user?.avatar}
               />
             </DropdownTrigger>
             <DropdownMenu aria-label="Profile Actions" variant="flat">
               <DropdownItem key="profile-item" className="h-14 gap-2">
                 <p className="font-semibold">Профиль</p>
-                <p className="font-semibold">{session?.data?.user?.email ?? session?.data?.user?.phone}</p>
+                <p className="font-semibold">{user?.email ?? user?.phone}</p>
               </DropdownItem>
               <DropdownItem key="system-item">Мб кнопка</DropdownItem>
               <DropdownItem key="configurations-item">Не кнопка</DropdownItem>
-              <DropdownItem onClick={() => signOut()} key="logout-item" color="danger">
-                Log Out
+              <DropdownItem onClick={() => {
+                signOut();
+              }} key="logout-item" color="danger">
+                Выйти
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>

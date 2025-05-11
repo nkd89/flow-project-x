@@ -26,6 +26,7 @@ export default function LoginCard({ state = "login" }: { state?: string }) {
         variant: "flat",
         color: "success",
       })
+      setSelected("login");
     }).catch((err) => {
       addToast({
         title: "Ошибка регистрации",
